@@ -7,6 +7,8 @@
     { "source": "/help-center", "destination": "https://onttle-examples-help-center.vercel.app/help-center" },
     { "source": "/help-center/:path*", "destination": "https://onttle-examples-help-center.vercel.app/help-center/:path*" },
     { "source": "/i18n-landing", "destination": "https://onttle-examples-i18n-landing.vercel.app/i18n-landing" },
-    { "source": "/i18n-landing/:path*", "destination": "https://onttle-examples-i18n-landing.vercel.app/i18n-landing/:path*" }
+    { "source": "/i18n-landing/:path*", "destination": "https://onttle-examples-i18n-landing.vercel.app/i18n-landing/:path*" },
+    { "source": "/feedback-board", "destination": "https://onttle-examples-feedback-board.vercel.app/feedback-board" },
+    { "source": "/feedback-board/:path*", "destination": "https://onttle-examples-feedback-board.vercel.app/feedback-board/:path*" }
   ]
 }
