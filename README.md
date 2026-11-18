@@ -4,7 +4,9 @@
 
 | 예제 | 내용 |
 | --- | --- |
-| [blog](blog) | Onttle로 만드는 기술 블로그 (목록·상세·태그·BM25 검색) |
+| [blog](blog) | Onttle로 만드는 기술 블로그 (목록·상세·태그·BM25 검색) — [example.onttle.com/blog](https://example.onttle.com/blog) |
+
+모든 예제는 `https://example.onttle.com/<name>`에 배포됩니다. 경로 라우팅은 [_gateway](_gateway)가 맡습니다.
 
 - 문서: https://onttle.com/docs
 - 저장소 규칙: [AGENTS.md](AGENTS.md)

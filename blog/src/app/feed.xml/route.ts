@@ -5,7 +5,7 @@ function escape(s: string) {
 }
 
 export async function GET() {
-  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const site = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000/blog").replace(/\/$/, "");
   const { posts } = await listPosts(1);
   const items = posts
     .map(

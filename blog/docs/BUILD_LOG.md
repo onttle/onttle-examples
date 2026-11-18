@@ -77,6 +77,12 @@ Onttle MCP `onttle_search_docs`, `onttle_get_api_reference`, `onttle_get_openapi
 - `POST /api/revalidate` (Bearer `REVALIDATE_SECRET`, `timingSafeEqual`).
 - 로컬 목(mock) API로 `pnpm lint`, `pnpm typecheck`, `pnpm build` 통과 (2026-11-18). 실제 Onttle 프로젝트 연결 확인은 TODO.
 
+### 7단계 — 배포 준비 (example.onttle.com/blog)
+
+- `basePath: "/blog"`. 공개 도메인은 `_gateway` 프로젝트가 갖고 `/blog/*`를 `onttle-examples-blog.vercel.app/blog/*`로 프록시 (예제마다 별도 Vercel 프로젝트).
+- basePath가 안 붙던 곳: 일반 `<form action="/search">`, `<a href="/feed.xml">` → `next/form`, `next/link`로 교체. `NEXT_PUBLIC_SITE_URL`에 `/blog` 포함 (metadataBase가 경로를 이어 붙임).
+- 실제 프로젝트 연결 빌드에서 `generateStaticParams`가 빈 배열 → Cache Components 빌드 실패. 글이 없을 때 자리표시 경로(`_`, 404) 하나를 돌려주도록 수정.
+
 ## 3. 막힌 점과 우회
 
 | 문제 | 우회 |
@@ -84,6 +90,7 @@ Onttle MCP `onttle_search_docs`, `onttle_get_api_reference`, `onttle_get_openapi
 | MCP로 프로젝트를 만들 수 없음 | 대시보드에서 생성 |
 | 시크릿 키는 대시보드에서만 발급 (MCP는 게시용만) | 대시보드에서 발급해 Vercel 환경변수에만 저장 |
 | REST 문서에 `filter` 연산자 목록이 없음 (MCP `onttle_search_contents` 설명에는 `equals`, `contains`, `has` 등이 있음). TEXT multiple 값으로 거르는 방법 미확인 | 태그 페이지는 전체 목록을 받아 서버에서 거름 (글이 수백 건 넘으면 재검토) |
+| Cache Components에서 `generateStaticParams`가 빈 배열이면 빌드 실패 (발행 글 0건일 때) | 자리표시 param 하나 반환 |
 | BM25는 Vector 동기화 기준이라 글을 고친 뒤 재동기화 필요 | README에 안내. 결과는 발행 목록과 교차 확인 |
 
 ## 4. 글에서 쓸 숫자 (TODO)

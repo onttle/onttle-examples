@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
+import Form from "next/form";
 import Link from "next/link";
 import "./globals.css";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+// basePath 포함 (예: https://example.onttle.com/blog)
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000/blog";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -20,7 +22,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-semibold">
               Onttle Blog
             </Link>
-            <form action="/search" className="flex-1 sm:max-w-xs">
+            <Form action="/search" className="flex-1 sm:max-w-xs">
               <input
                 type="search"
                 name="q"
@@ -28,13 +30,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 aria-label="글 검색"
                 className="w-full rounded-md border border-neutral-300 bg-transparent px-3 py-1.5 text-sm dark:border-neutral-700"
               />
-            </form>
+            </Form>
           </nav>
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10">{children}</main>
         <footer className="mx-auto w-full max-w-3xl px-4 py-8 text-sm text-neutral-500">
           콘텐츠는 <a href="https://onttle.com" className="underline">Onttle</a>에서 관리합니다 ·{" "}
-          <a href="/feed.xml" className="underline">RSS</a>
+          <Link href="/feed.xml" prefetch={false} className="underline">
+            RSS
+          </Link>
         </footer>
       </body>
     </html>

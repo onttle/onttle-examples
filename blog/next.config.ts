@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // example.onttle.com/blog 아래에서 서비스 (게이트웨이가 /blog/* 를 이 앱으로 프록시)
+  basePath: "/blog",
   cacheComponents: true,
   partialPrefetching: true,
   images: {

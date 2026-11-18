@@ -6,7 +6,8 @@ import { listPostsByTag, listTags } from "@/lib/onttle";
 
 export async function generateStaticParams() {
   const tags = await listTags();
-  return tags.map((t) => ({ tag: t.name }));
+  // Cache Components는 빈 배열을 허용하지 않음 → 글이 없을 때는 404가 나는 자리표시 경로 하나
+  return tags.length > 0 ? tags.map((t) => ({ tag: t.name })) : [{ tag: "_" }];
 }
 
 export async function generateMetadata({ params }: PageProps<"/tags/[tag]">): Promise<Metadata> {

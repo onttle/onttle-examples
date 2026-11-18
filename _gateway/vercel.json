@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "cleanUrls": true,
+  "rewrites": [
+    { "source": "/blog", "destination": "https://onttle-examples-blog.vercel.app/blog" },
+    { "source": "/blog/:path*", "destination": "https://onttle-examples-blog.vercel.app/blog/:path*" }
+  ]
+}

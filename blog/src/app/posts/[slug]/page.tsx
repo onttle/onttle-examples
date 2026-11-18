@@ -11,7 +11,9 @@ import { coverUrl, formatDate, getPostBySlug, listPosts } from "@/lib/onttle";
 // 빌드 때는 최신 글 첫 페이지만 미리 만들고, 나머지는 첫 요청 때 생성해 캐시한다.
 export async function generateStaticParams() {
   const { posts } = await listPosts(1);
-  return posts.filter((p) => p.slug).map((p) => ({ slug: p.slug! }));
+  const params = posts.filter((p) => p.slug).map((p) => ({ slug: p.slug! }));
+  // Cache Components는 빈 배열을 허용하지 않음 → 글이 없을 때는 404가 나는 자리표시 경로 하나
+  return params.length > 0 ? params : [{ slug: "_" }];
 }
 
 export async function generateMetadata({ params }: PageProps<"/posts/[slug]">): Promise<Metadata> {

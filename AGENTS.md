@@ -8,6 +8,7 @@ AI 코딩 에이전트와 사람 모두 이 규칙을 따릅니다.
 - `<name>/docs/BUILD_LOG.md`: 만든 기록 (단계별 프롬프트, 에이전트가 틀린 점, 막힌 점).
 - `<name>/docs/POST.md`: 이 예제로 쓴 글. front matter `status: draft | published`.
 - `<name>/docs/assets/`: 캡처·GIF.
+- `_gateway/`: 예외. 앱이 아니라 `example.onttle.com` 라우터(`vercel.json` rewrite + 목록 페이지). 예제를 추가하면 여기에도 등록합니다 ([_gateway/README.md](_gateway/README.md)).
 
 ## Onttle API
 
@@ -24,4 +25,4 @@ AI 코딩 에이전트와 사람 모두 이 규칙을 따릅니다.
 - `pnpm lint`, `pnpm typecheck`, `pnpm build` 통과
 - README: 데모 링크, 사용한 Onttle 기능, 실행 방법
 - BUILD_LOG 작성, `.env.example` 갱신
-- Vercel 배포 시 Root Directory는 `<name>`
+- Vercel 배포: 프로젝트 `onttle-examples-<name>`, Root Directory `<name>`, `basePath: "/<name>"`, 공개 URL `https://example.onttle.com/<name>`

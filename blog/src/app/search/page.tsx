@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Form from "next/form";
 import { Suspense } from "react";
 import { PostList } from "@/components/post-card";
 import { searchPosts } from "@/lib/onttle";
@@ -11,7 +12,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
 
   return (
     <>
-      <form action="/search" className="mb-10 flex gap-2">
+      <Form action="/search" className="mb-10 flex gap-2">
         <input
           type="search"
           name="q"
@@ -21,7 +22,7 @@ async function Results({ searchParams }: { searchParams: PageProps<"/search">["s
           className="flex-1 rounded-md border border-neutral-300 bg-transparent px-3 py-2 dark:border-neutral-700"
         />
         <button className="rounded-md bg-neutral-900 px-4 py-2 text-white dark:bg-neutral-100 dark:text-neutral-900">검색</button>
-      </form>
+      </Form>
       {query ? (
         <>
           <p className="mb-8 text-sm text-neutral-500">&ldquo;{query}&rdquo; 검색 결과</p>

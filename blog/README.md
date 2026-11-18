@@ -2,11 +2,13 @@
 
 Onttle을 헤드리스 CMS로 쓰는 Next.js 기술 블로그 예제입니다. 글은 Onttle CMS에서 쓰고, 이 앱은 REST API로 읽어 보여줍니다.
 
-- 데모: _배포 후 추가_
+- 데모: https://example.onttle.com/blog
 - 기획서: [Onttle 예제 기획서 — blog](https://claude.ai/artifact/6viTrCwX8pS16NGpje9Zii)
 - 만든 기록: [docs/BUILD_LOG.md](docs/BUILD_LOG.md)
 
 ## 화면
+
+경로는 모두 `basePath` `/blog` 아래입니다 (로컬: `http://localhost:3000/blog`).
 
 | 경로 | 내용 | 렌더링 |
 | --- | --- | --- |
@@ -60,7 +62,7 @@ pnpm dev
 | `ONTTLE_PROJECT_ID` | 프로젝트 설정의 Project ID |
 | `ONTTLE_API_KEY` | 시크릿 키 `sk-proj_…` (서버 전용, `NEXT_PUBLIC_` 금지) |
 | `REVALIDATE_SECRET` | `/api/revalidate` 보호용 임의 문자열 |
-| `NEXT_PUBLIC_SITE_URL` | RSS·OG 절대 URL |
+| `NEXT_PUBLIC_SITE_URL` | RSS·OG 절대 URL, basePath 포함 (`https://example.onttle.com/blog`) |
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm build
@@ -69,14 +71,16 @@ pnpm lint && pnpm typecheck && pnpm build
 ### 즉시 반영
 
 ```bash
-curl -X POST https://<도메인>/api/revalidate -H "Authorization: Bearer $REVALIDATE_SECRET"
+curl -X POST https://example.onttle.com/blog/api/revalidate -H "Authorization: Bearer $REVALIDATE_SECRET"
 ```
 
 Onttle Webhook에 이 URL과 `Authorization` 헤더를 등록하면 글을 고칠 때 자동으로 호출됩니다.
 
 ## 배포 (Vercel)
 
-Root Directory를 `blog`로 두고 위 환경변수를 Vercel에만 저장합니다.
+- 프로젝트 `onttle-examples-blog`, Root Directory `blog`. 위 환경변수는 Vercel에만 저장합니다.
+- `next.config.ts`의 `basePath: "/blog"`로 모든 경로가 `/blog` 아래에 생깁니다. 링크는 `next/link`, 폼은 `next/form`을 써야 basePath가 붙습니다.
+- 공개 도메인 `example.onttle.com`은 [`_gateway`](../_gateway) 프로젝트가 갖고, `/blog/*`를 `onttle-examples-blog.vercel.app/blog/*`로 프록시합니다.
 
 ## 이번에 하지 않은 것
 
