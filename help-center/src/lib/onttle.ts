@@ -226,7 +226,7 @@ export async function sendMessage(chatId: string, message: string): Promise<Chat
   );
 }
 
-/** 참조 콘텐츠. 실제 응답의 id는 content UUID가 아니라 slug였다 (BUILD_LOG). 둘 다 받는다. */
+/** 참조 콘텐츠. 실측: 스트림 contents의 id는 slug, 이력 connections의 id는 content UUID (BUILD_LOG). 둘 다 받는다. */
 export interface ContentRef {
   id: string;
   table_id: string;

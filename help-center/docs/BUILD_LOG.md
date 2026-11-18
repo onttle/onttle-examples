@@ -63,6 +63,8 @@
    - 이력 `chat_messages_contents_connections[].contents`는 `{ id, table_id }`뿐. 문서의 `slug`·`title`·`data`·`icon` 없음. 메시지에 `role`, `contents` 필드가 더 있음.
    - `score`가 **문자열**(`"0.5256…"`). 클라이언트가 `toFixed()`를 부르면 브라우저에서 터짐 → 서버에서 `Number()`.
    - 이력 connections는 검색 후보 전체(`count`만큼, 관계없는 FAQ 포함), 스트림 `contents`는 답변이 참조한 것(1~2건). 처음엔 connections를 출처로 써서 "동시 편집" 같은 무관한 FAQ가 출처로 나옴 → 출처는 스트림 `contents`, 점수만 connections에서. 질문·slug는 캐시된 FAQ 목록에서 찾음.
+   - **같은 FAQ인데 ID 형식이 다름**: 스트림 `contents[].id`는 slug(`education-discount`), 이력 connections의 `contents.id`는 content UUID. slug로 점수를 찾아서 점수가 항상 `null`이었음 → 양쪽 모두 FAQ 레코드로 바꾼 뒤 맞춤.
+   - **이어가기 스트림의 `contents[].id`는 식별자가 아닐 때가 있음**: "비영리 단체는요?" → `plans` 카테고리 값 UUID, "팀원 초대는 어떻게 해요?" → `"41"`(invite-members의 `order` 값). 모델이 참조 목록을 직접 쓰면서 콘텐츠의 아무 필드나 고르는 것으로 보임. 이력 connections의 UUID·점수는 정확함 → 스트림 `contents`가 FAQ로 하나도 안 풀리면 이력의 최고 점수 후보 하나를 출처로. 수정 후 새 대화·이어가기 2회·근거 없음 4건 모두 출처 정상. Onttle에 보고할 만한 문제.
 
 ### 2단계 — 뼈대와 API 모듈
 
@@ -125,7 +127,7 @@ Vector 동기화 후 실제 검색·AI 대화 확인 (2026-11-18): 아래 4절 �
   - 새 프로젝트의 기본 Deployment Protection이 `all_except_custom_domains`라 `*.vercel.app` 프로덕션 주소까지 Vercel 로그인이 걸림 → 게이트웨이 프록시가 막힘. blog와 같은 `prod_deployment_urls_and_all_previews`로 바꿈.
   - 환경변수 9개를 production·preview에 등록 (`.env.local`에서 CLI로 바로 넘겨 값은 출력하지 않음). `NEXT_PUBLIC_SITE_URL`은 `https://example.onttle.com/help-center`. 팀 정책으로 일반 값도 sensitive/encrypted로 저장됨.
   - `vercel deploy --prod`로 PR 브랜치 코드를 프로덕션 배포 → `onttle-examples-help-center.vercel.app/help-center`에서 목록·상세·검색·AI 대화·재검증(401) 확인.
-  - 그 배포에서 AI 대화 1회의 출처 점수가 `null` (출처 자체는 맞음). 로컬에서는 점수가 있었음 → 이력 GET이 방금 메시지 저장보다 먼저 읽혔을 가능성. TODO: 재현 확인
+  - 그 배포에서 AI 대화의 출처 점수가 계속 `null` (출처 자체는 맞음). 처음엔 이력 저장 타이밍을 의심했으나, 스트림 직후·1초·3초 뒤 이력이 모두 같아 **타이밍 문제가 아님**. 원인은 아래 2단계 6번의 ID 형식 차이 (내 버그). 로컬 화면 확인 때도 점수가 빠져 있었는데 놓쳤음.
   - `example.onttle.com/help-center`는 게이트웨이 rewrite가 PR에만 있어 머지 전까지 404.
 
 ## 3. 막힌 점과 우회

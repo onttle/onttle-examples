@@ -7,6 +7,7 @@ import {
   startChat,
   type ChatMessage,
   type ContentRef,
+  type Faq,
 } from "@/lib/onttle";
 
 /**
@@ -33,24 +34,35 @@ function fail(error: AskError, status: number) {
  * 출처 = 스트림의 contents (답변이 실제로 참조한 것, 실측 1~2건).
  * 이력의 connections는 검색 후보 전체(count만큼)라 관계없는 FAQ까지 섞여 있어 점수만 가져온다.
  * score는 실제 응답에서 문자열("0.5256…")로 왔다 → 숫자로 바꾼다.
+ * 같은 FAQ라도 스트림 contents.id는 slug, 이력 connections의 contents.id는 content UUID로 온다 (실측).
+ * 그래서 양쪽 다 FAQ 레코드로 바꾼 뒤 faq.id끼리 맞춘다.
+ * 이어가기 답변에서는 스트림 contents.id가 FAQ를 가리키지 않는 값(카테고리 값 UUID, order 숫자 "41")으로
+ * 온 적이 있다 → 하나도 FAQ로 안 풀리면 이력의 최고 점수 후보 하나를 출처로 쓴다.
  */
 async function sourcesOf(refs: ContentRef[], latest: ChatMessage | undefined): Promise<AskSource[]> {
-  const scores = new Map<string, number>();
-  for (const c of latest?.chat_messages_contents_connections ?? []) {
-    const score = Number(c.score);
-    if (Number.isFinite(score)) scores.set(c.contents.id, score);
-  }
-  const ids = refs.map((r) => r.id);
-
   const faqs = await listFaqs();
   const byKey = new Map(faqs.flatMap((f) => [[f.id, f] as const, ...(f.slug ? [[f.slug, f] as const] : [])]));
+
+  const scores = new Map<string, number>(); // faq.id → score
+  let best: { faq: Faq; score: number } | undefined;
+  for (const c of latest?.chat_messages_contents_connections ?? []) {
+    const faq = byKey.get(c.contents.id);
+    const score = Number(c.score);
+    if (!faq || !Number.isFinite(score)) continue;
+    scores.set(faq.id, score);
+    if (!best || score > best.score) best = { faq, score };
+  }
+
   const seen = new Set<string>();
   const sources: AskSource[] = [];
-  for (const id of ids) {
-    const faq = byKey.get(id);
+  for (const ref of refs) {
+    const faq = byKey.get(ref.id);
     if (!faq || seen.has(faq.id)) continue; // 발행 목록에 없는 콘텐츠는 링크하지 않는다
     seen.add(faq.id);
-    sources.push({ slug: faq.slug ?? faq.id, question: faq.data.question, score: scores.get(id) ?? null });
+    sources.push({ slug: faq.slug ?? faq.id, question: faq.data.question, score: scores.get(faq.id) ?? null });
+  }
+  if (sources.length === 0 && refs.length > 0 && best) {
+    sources.push({ slug: best.faq.slug ?? best.faq.id, question: best.faq.data.question, score: best.score });
   }
   return sources;
 }
