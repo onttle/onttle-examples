@@ -23,7 +23,7 @@ export async function GET() {
 <rss version="2.0"><channel>
 <title>Onttle Blog</title>
 <link>${site}</link>
-<description>Onttle을 헤드리스 CMS로 쓰는 Next.js 기술 블로그 예제</description>
+<description>A Next.js tech blog example that uses Onttle as a headless CMS</description>
 ${items}
 </channel></rss>`;
 

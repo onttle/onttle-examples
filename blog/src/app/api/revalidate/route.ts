@@ -2,7 +2,7 @@ import { revalidateTag } from "next/cache";
 import { timingSafeEqual } from "node:crypto";
 
 /**
- * Onttle 웹훅(콘텐츠 CREATED/UPDATED/DELETED)이나 수동 호출로 캐시를 비운다.
+ * Clears the cache from an Onttle webhook (content CREATED/UPDATED/DELETED) or a manual call.
  *   POST /api/revalidate
  *   Authorization: Bearer <REVALIDATE_SECRET>
  */

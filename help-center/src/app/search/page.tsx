@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { faqHref, searchFaqs } from "@/lib/onttle";
 import { topicLabel } from "@/lib/topics";
 
-export const metadata: Metadata = { title: "검색", robots: { index: false } };
+export const metadata: Metadata = { title: "Search", robots: { index: false } };
 
 async function Results({ query }: { query: string }) {
   const results = await searchFaqs(query);
@@ -14,9 +14,9 @@ async function Results({ query }: { query: string }) {
   if (results.length === 0) {
     return (
       <p className="text-neutral-500">
-        비슷한 FAQ를 찾지 못했습니다.{" "}
+        No similar FAQs found.{" "}
         <Link href={askHref} className="underline">
-          AI에게 물어보기
+          Ask AI
         </Link>
       </p>
     );
@@ -30,15 +30,15 @@ async function Results({ query }: { query: string }) {
               {faq.data.question}
             </Link>
             <p className="mt-1 text-xs text-neutral-500">
-              {topicLabel(faq.data.topic?.name)} · 유사도 {faq.score.toFixed(2)}
+              {topicLabel(faq.data.topic?.name)} · similarity {faq.score.toFixed(2)}
             </p>
           </li>
         ))}
       </ul>
       <p className="mt-8 text-sm text-neutral-500">
-        원하는 답이 없나요?{" "}
+        Not what you were looking for?{" "}
         <Link href={askHref} className="underline">
-          AI에게 물어보기
+          Ask AI
         </Link>
       </p>
     </>
@@ -56,23 +56,23 @@ async function SearchBody({ searchParams }: { searchParams: PageProps<"/search">
           type="search"
           name="q"
           defaultValue={query}
-          placeholder="예: 결제 수단을 바꾸고 싶어요"
-          aria-label="검색어"
+          placeholder="e.g. I want to change my payment method"
+          aria-label="Search query"
           className="flex-1 rounded-md border border-neutral-300 bg-transparent px-3 py-2 dark:border-neutral-700"
         />
         <button className="rounded-md bg-neutral-900 px-4 py-2 text-white dark:bg-neutral-100 dark:text-neutral-900">
-          검색
+          Search
         </button>
       </Form>
       {query ? (
         <>
-          <p className="mb-6 text-sm text-neutral-500">&ldquo;{query}&rdquo;와 뜻이 비슷한 FAQ</p>
-          <Suspense key={query} fallback={<p className="text-neutral-500">검색 중…</p>}>
+          <p className="mb-6 text-sm text-neutral-500">FAQs similar in meaning to &ldquo;{query}&rdquo;</p>
+          <Suspense key={query} fallback={<p className="text-neutral-500">Searching…</p>}>
             <Results query={query} />
           </Suspense>
         </>
       ) : (
-        <p className="text-neutral-500">단어가 정확히 같지 않아도 뜻이 비슷한 FAQ를 찾습니다.</p>
+        <p className="text-neutral-500">Finds FAQs with a similar meaning, even when the words do not match exactly.</p>
       )}
     </>
   );
@@ -81,8 +81,8 @@ async function SearchBody({ searchParams }: { searchParams: PageProps<"/search">
 export default function SearchPage(props: PageProps<"/search">) {
   return (
     <>
-      <h1 className="mb-6 text-3xl font-bold">의미 검색</h1>
-      <Suspense fallback={<p className="text-neutral-500">불러오는 중…</p>}>
+      <h1 className="mb-6 text-3xl font-bold">Semantic search</h1>
+      <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
         <SearchBody searchParams={props.searchParams} />
       </Suspense>
     </>

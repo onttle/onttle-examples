@@ -130,6 +130,28 @@ Vector 동기화 후 실제 검색·AI 대화 확인 (2026-11-18): 아래 4절 �
   - 그 배포에서 AI 대화의 출처 점수가 계속 `null` (출처 자체는 맞음). 처음엔 이력 저장 타이밍을 의심했으나, 스트림 직후·1초·3초 뒤 이력이 모두 같아 **타이밍 문제가 아님**. 원인은 아래 2단계 6번의 ID 형식 차이 (내 버그). 로컬 화면 확인 때도 점수가 빠져 있었는데 놓쳤음.
   - `example.onttle.com/help-center`는 게이트웨이 rewrite가 PR에만 있어 머지 전까지 404.
 
+### 8단계 — 영문 전환 (2026-11-18)
+
+- 화면 문구·주석·README·`.env.example`·루트 `AGENTS.md`를 영어로 바꿈 (blog, `_gateway` 포함). `<html lang>`은 `en`, blog 날짜 형식은 `en-US`. 가상 서비스 이름은 "Noteforge". 이 BUILD_LOG와 POST.md는 한국어 글감이라 그대로 둠.
+- blog의 Onttle 데이터(posts 9건)는 이미 영어였음. help-center FAQ 30건은 MCP `onttle_update_contents`로 질문·답변·키워드를 영어로 바꿈 (slug·주제·순서는 그대로). 적용 후 공개 API에서 한글이 남은 행 0건 확인.
+- Vector 재동기화(사람, 대시보드) 후 영어 질문으로 재측정 (Embeddings, threshold 0, count 3):
+
+  | 질문 | 정답 FAQ | 순위 | 정답 점수 | 2위 점수 |
+  | --- | --- | --- | --- | --- |
+  | How long do I have to get a refund? (원문) | refund-policy | 1 | 1.000 | 0.387 |
+  | how to stop auto renewal | cancel-subscription | 1 | 0.781 | 0.419 |
+  | log in with my company Okta account | sso | 1 | 0.732 | 0.422 |
+  | student discount | education-discount | 1 | 0.730 | 0.387 |
+  | forgot my pw | reset-password | 1 | 0.715 | 0.542 |
+  | if I kick out a teammate do their notes disappear | remove-member | 1 | 0.705 | 0.507 |
+  | moving my stuff over from Notion | import-notes | 1 | 0.645 | 0.395 |
+  | I want my money back | refund-policy | 1 | 0.561 | 0.427 |
+  | whats the weather today (근거 없음) | - | - | 최고 0.198 | |
+  | pasta recipe (근거 없음) | - | - | 최고 0.239 | |
+
+  1위 정답 8/8 (한국어 때는 4/8). 정답 최저 0.56, 무관한 질문 최고 0.24 → 검색·Chats threshold를 둘 다 **0.4**로 (이전 0.35 / 0.3은 한국어 FAQ 기준).
+- Chats (hybrid, count 5): threshold 0.7 → "I want my money back"에 근거 못 찾음. 0.4 → 14일 이내 전액 환불로 답하고 출처 refund-policy, 이어가기(연간 결제 한 달 뒤)는 비례 환불로 문맥 유지, 날씨 질문은 모른다고 답함. 답변은 영어로 나옴. 이어가기 스트림의 `contents.id`는 이번에도 `"21"`(refund-policy의 order) → 이력 대체 출처가 계속 필요.
+
 ## 3. 막힌 점과 우회
 
 | 문제 | 우회 |

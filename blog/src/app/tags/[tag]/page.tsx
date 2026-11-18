@@ -6,7 +6,7 @@ import { listPostsByTag, listTags } from "@/lib/onttle";
 
 export async function generateStaticParams() {
   const tags = await listTags();
-  // Cache Components는 빈 배열을 허용하지 않음 → 글이 없을 때는 404가 나는 자리표시 경로 하나
+  // Cache Components does not allow an empty array → return one placeholder path (404) when there are no posts
   return tags.length > 0 ? tags.map((t) => ({ tag: t.name })) : [{ tag: "_" }];
 }
 
@@ -22,7 +22,7 @@ async function TagPosts({ params }: { params: PageProps<"/tags/[tag]">["params"]
   return (
     <>
       <h1 className="mb-8 text-3xl font-bold">
-        #{tag} <span className="text-lg font-normal text-neutral-500">{posts.length}개의 글</span>
+        #{tag} <span className="text-lg font-normal text-neutral-500">{posts.length === 1 ? "1 post" : `${posts.length} posts`}</span>
       </h1>
       <PostList posts={posts} empty="" />
     </>
@@ -31,7 +31,7 @@ async function TagPosts({ params }: { params: PageProps<"/tags/[tag]">["params"]
 
 export default function TagPage(props: PageProps<"/tags/[tag]">) {
   return (
-    <Suspense fallback={<p className="text-neutral-500">불러오는 중…</p>}>
+    <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
       <TagPosts params={props.params} />
     </Suspense>
   );

@@ -26,14 +26,14 @@ async function Posts({ searchParams }: { searchParams: PageProps<"/">["searchPar
 
   return (
     <>
-      <PostList posts={posts} empty="아직 발행된 글이 없습니다." />
+      <PostList posts={posts} empty="No posts published yet." />
       {pagination.totalPages > 1 && (
-        <nav className="mt-12 flex justify-between text-sm" aria-label="페이지">
-          {page > 1 ? <Link href={page === 2 ? "/" : `/?page=${page - 1}`}>← 최신 글</Link> : <span />}
+        <nav className="mt-12 flex justify-between text-sm" aria-label="Pagination">
+          {page > 1 ? <Link href={page === 2 ? "/" : `/?page=${page - 1}`}>← Newer posts</Link> : <span />}
           <span className="text-neutral-500">
             {page} / {pagination.totalPages}
           </span>
-          {page < pagination.totalPages ? <Link href={`/?page=${page + 1}`}>이전 글 →</Link> : <span />}
+          {page < pagination.totalPages ? <Link href={`/?page=${page + 1}`}>Older posts →</Link> : <span />}
         </nav>
       )}
     </>
@@ -43,11 +43,11 @@ async function Posts({ searchParams }: { searchParams: PageProps<"/">["searchPar
 export default function Home(props: PageProps<"/">) {
   return (
     <>
-      <h1 className="mb-6 text-3xl font-bold">최신 글</h1>
+      <h1 className="mb-6 text-3xl font-bold">Latest posts</h1>
       <Suspense>
         <Tags />
       </Suspense>
-      <Suspense fallback={<p className="text-neutral-500">불러오는 중…</p>}>
+      <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
         <Posts searchParams={props.searchParams} />
       </Suspense>
     </>

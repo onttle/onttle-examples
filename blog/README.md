@@ -1,87 +1,87 @@
-# Onttle로 만드는 기술 블로그 (blog)
+# A Tech Blog Built on Onttle (blog)
 
-Onttle을 헤드리스 CMS로 쓰는 Next.js 기술 블로그 예제입니다. 글은 Onttle CMS에서 쓰고, 이 앱은 REST API로 읽어 보여줍니다.
+A Next.js tech blog example that uses Onttle as a headless CMS. Posts are written in the Onttle CMS, and this app reads them through the REST API.
 
-- 데모: https://example.onttle.com/blog
-- 기획서: [Onttle 예제 기획서 — blog](https://claude.ai/artifact/6viTrCwX8pS16NGpje9Zii)
-- 만든 기록: [docs/BUILD_LOG.md](docs/BUILD_LOG.md)
+- Demo: https://example.onttle.com/blog
+- Plan: [Onttle example plan — blog](https://claude.ai/artifact/6viTrCwX8pS16NGpje9Zii) (in Korean)
+- Build record: [docs/BUILD_LOG.md](docs/BUILD_LOG.md) (in Korean)
 
-## 화면
+## Screens
 
-경로는 모두 `basePath` `/blog` 아래입니다 (로컬: `http://localhost:3000/blog`).
+Every path is under the `basePath` `/blog` (local: `http://localhost:3000/blog`).
 
-| 경로 | 내용 | 렌더링 |
+| Path | What it shows | Rendering |
 | --- | --- | --- |
-| `/` | 최신 글 목록 (`?page=`), 태그 목록 | 정적 셸 + 캐시된 데이터 (5분) |
-| `/posts/[slug]` | 글 상세, 커버 이미지, 메타데이터 | 첫 페이지 글은 빌드 때 생성, 나머지는 첫 요청 때 생성 후 캐시 |
-| `/tags/[tag]` | 태그별 글 목록 | 위와 같음 |
-| `/search?q=` | BM25 키워드 검색 | 요청마다 (검색어별 결과는 5분 캐시) |
-| `/feed.xml` | RSS | 캐시 (5분) |
-| `POST /api/revalidate` | `posts` 캐시 즉시 무효화 | 동적 |
+| `/` | Latest posts (`?page=`), tag list | Static shell + cached data (5 minutes) |
+| `/posts/[slug]` | Post detail, cover image, metadata | First-page posts are generated at build time; the rest on first request, then cached |
+| `/tags/[tag]` | Posts by tag | Same as above |
+| `/search?q=` | BM25 keyword search | Per request (results per query cached for 5 minutes) |
+| `/feed.xml` | RSS | Cached (5 minutes) |
+| `POST /api/revalidate` | Invalidates the `posts` cache at once | Dynamic |
 
-## 사용한 Onttle 기능
+## Onttle features used
 
-| 기능 | 엔드포인트 | 쓰는 곳 |
+| Feature | Endpoint | Used for |
 | --- | --- | --- |
-| 콘텐츠 목록 (정렬·페이지네이션) | `GET /v1/{projectId}/tables/posts?page&size&sort` | 목록, 태그, RSS |
-| 콘텐츠 단건 (slug로 조회) | `GET /v1/{projectId}/tables/posts/{slug}` | 글 상세 |
-| BM25 키워드 검색 | `POST /v1/{projectId}/tables/posts/bm25` | 검색 (`rerank: false`) |
-| 파일 (FILE 컬럼의 `s3_path`) | 응답에 포함 | 커버 이미지 |
-| TEXT multiple 컬럼 | 응답에 포함 | 태그 |
-| Webhook (선택) | 콘텐츠 변경 시 `/api/revalidate` 호출 | 즉시 반영 |
+| Contents list (sort, pagination) | `GET /v1/{projectId}/tables/posts?page&size&sort` | List, tags, RSS |
+| Single content (by slug) | `GET /v1/{projectId}/tables/posts/{slug}` | Post detail |
+| BM25 keyword search | `POST /v1/{projectId}/tables/posts/bm25` | Search (`rerank: false`) |
+| Files (`s3_path` of a FILE column) | Included in the response | Cover image |
+| TEXT multiple column | Included in the response | Tags |
+| Webhook (optional) | Calls `/api/revalidate` when content changes | Instant updates |
 
-API 호출은 모두 [`src/lib/onttle.ts`](src/lib/onttle.ts) 한 파일에 있고, `server-only`로 브라우저 번들에 들어가지 않게 막았습니다. BM25 검색은 POST라 **시크릿 키**가 필요하므로 서버 컴포넌트에서만 부릅니다.
+Every API call lives in one file, [`src/lib/onttle.ts`](src/lib/onttle.ts), and `server-only` keeps it out of the browser bundle. BM25 search is a POST and needs a **secret key**, so it is called from server components only.
 
-## Onttle 프로젝트 준비
+## Preparing the Onttle project
 
-`posts` 테이블 (slug 지원):
+The `posts` table (slug enabled):
 
-| 컬럼 | 타입 | 비고 |
+| Column | Type | Notes |
 | --- | --- | --- |
-| `title` | TEXT | 필수 |
-| `excerpt` | TEXT (textarea) | 요약 |
-| `body` | TEXT (textarea) | 마크다운 |
-| `cover_image` | FILE | 선택 |
-| `tags` | TEXT (multiple) | 태그 이름 배열 |
+| `title` | TEXT | Required |
+| `excerpt` | TEXT (textarea) | Summary |
+| `body` | TEXT (textarea) | Markdown |
+| `cover_image` | FILE | Optional |
+| `tags` | TEXT (multiple) | Array of tag names |
 
-slug·발행일(`published_at`)·발행 상태는 Onttle 기본 필드를 씁니다. 프로젝트에는 `authors` 테이블도 있지만 이 예제에서는 쓰지 않습니다.
+The slug, publish date (`published_at`) and publish status use Onttle's built-in fields. The project also has an `authors` table, which this example does not use.
 
-검색을 쓰려면 **Vector** 메뉴에서 `posts` 테이블을 동기화하세요. 글을 새로 발행하거나 고친 뒤에도 다시 동기화해야 검색에 반영됩니다.
+To use search, sync the `posts` table in the **Vector** menu. Sync again after publishing or editing a post so search picks up the change.
 
-## 실행
+## Running
 
 ```bash
-cp .env.example .env.local   # 값 채우기
+cp .env.example .env.local   # fill in the values
 pnpm install
 pnpm dev
 ```
 
-| 환경변수 | 설명 |
+| Environment variable | Description |
 | --- | --- |
 | `ONTTLE_API_URL` | `https://api.onttle.com` |
-| `ONTTLE_PROJECT_ID` | 프로젝트 설정의 Project ID |
-| `ONTTLE_API_KEY` | 시크릿 키 `sk-proj_…` (서버 전용, `NEXT_PUBLIC_` 금지) |
-| `REVALIDATE_SECRET` | `/api/revalidate` 보호용 임의 문자열 |
-| `NEXT_PUBLIC_SITE_URL` | RSS·OG 절대 URL, basePath 포함 (`https://example.onttle.com/blog`) |
+| `ONTTLE_PROJECT_ID` | Project ID from the project settings |
+| `ONTTLE_API_KEY` | Secret key `sk-proj_…` (server only, never `NEXT_PUBLIC_`) |
+| `REVALIDATE_SECRET` | Any random string that protects `/api/revalidate` |
+| `NEXT_PUBLIC_SITE_URL` | Absolute URL for RSS and OG, including the basePath (`https://example.onttle.com/blog`) |
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm build
 ```
 
-### 즉시 반영
+### Instant updates
 
 ```bash
 curl -X POST https://example.onttle.com/blog/api/revalidate -H "Authorization: Bearer $REVALIDATE_SECRET"
 ```
 
-Onttle Webhook에 이 URL과 `Authorization` 헤더를 등록하면 글을 고칠 때 자동으로 호출됩니다.
+Register this URL and the `Authorization` header as an Onttle webhook, and it is called automatically whenever a post changes.
 
-## 배포 (Vercel)
+## Deployment (Vercel)
 
-- 프로젝트 `onttle-examples-blog`, Root Directory `blog`. 위 환경변수는 Vercel에만 저장합니다.
-- `next.config.ts`의 `basePath: "/blog"`로 모든 경로가 `/blog` 아래에 생깁니다. 링크는 `next/link`, 폼은 `next/form`을 써야 basePath가 붙습니다.
-- 공개 도메인 `example.onttle.com`은 [`_gateway`](../_gateway) 프로젝트가 갖고, `/blog/*`를 `onttle-examples-blog.vercel.app/blog/*`로 프록시합니다.
+- Project `onttle-examples-blog`, Root Directory `blog`. The environment variables above are stored in Vercel only.
+- `basePath: "/blog"` in `next.config.ts` puts every path under `/blog`. Use `next/link` for links and `next/form` for forms so the basePath is added.
+- The public domain `example.onttle.com` belongs to the [`_gateway`](../_gateway) project, which proxies `/blog/*` to `onttle-examples-blog.vercel.app/blog/*`.
 
-## 이번에 하지 않은 것
+## Not included
 
-댓글, 로그인, 조회수, 다국어, AI 챗봇·임베딩 검색, 글쓰기 UI, OG 이미지 자동 생성.
+Comments, login, view counts, multiple languages, an AI chatbot or embeddings search, a writing UI, automatic OG image generation.

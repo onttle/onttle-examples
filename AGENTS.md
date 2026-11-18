@@ -1,28 +1,28 @@
-# AGENTS.md — onttle-examples 저장소 규칙
+# AGENTS.md — onttle-examples repository rules
 
-AI 코딩 에이전트와 사람 모두 이 규칙을 따릅니다.
+AI coding agents and people both follow these rules.
 
-## 구조
+## Structure
 
-- `<name>/` (저장소 루트 바로 아래): 예제 하나 = 독립된 Next.js 앱 (App Router, TypeScript, Tailwind, `src/`). 예제끼리 코드를 공유하지 않습니다.
-- `<name>/docs/BUILD_LOG.md`: 만든 기록 (단계별 프롬프트, 에이전트가 틀린 점, 막힌 점).
-- `<name>/docs/POST.md`: 이 예제로 쓴 글. front matter `status: draft | published`.
-- `<name>/docs/assets/`: 캡처·GIF.
-- `_gateway/`: 예외. 앱이 아니라 `example.onttle.com` 라우터(`vercel.json` rewrite + 목록 페이지). 예제를 추가하면 여기에도 등록합니다 ([_gateway/README.md](_gateway/README.md)).
+- `<name>/` (directly under the repository root): one example = one independent Next.js app (App Router, TypeScript, Tailwind, `src/`). Examples do not share code.
+- `<name>/docs/BUILD_LOG.md`: the build record (prompts per step, what the agent got wrong, where it got stuck).
+- `<name>/docs/POST.md`: the post written from this example. Front matter `status: draft | published`.
+- `<name>/docs/assets/`: screenshots and GIFs.
+- `_gateway/`: the exception. It is not an app but the `example.onttle.com` router (`vercel.json` rewrites + the index page). When you add an example, register it here too ([_gateway/README.md](_gateway/README.md)).
 
 ## Onttle API
 
-- 경로와 필드는 **그 예제 프로젝트의 OpenAPI 명세**를 기준으로 합니다. 명세에 없는 필드·파라미터를 추측하지 않습니다. 문서와 명세가 다르면 BUILD_LOG에 적습니다.
-- 호출은 `src/lib/onttle.ts` 한곳에 모으고 `import "server-only"`를 둡니다.
-- 시크릿 키(`sk-proj_…`)는 서버에서만 씁니다. `NEXT_PUBLIC_` 접두사에 키를 넣지 않습니다.
+- Paths and fields follow **that example project's OpenAPI spec**. Do not guess fields or parameters that are not in the spec. When the docs and the spec differ, write it down in BUILD_LOG.
+- Keep all calls in `src/lib/onttle.ts`, with `import "server-only"`.
+- Use the secret key (`sk-proj_…`) on the server only. Never put a key behind the `NEXT_PUBLIC_` prefix.
 
-## 비밀값
+## Secrets
 
-- 실제 API 키·프로젝트 ID를 커밋하지 않습니다. `.env.example`에는 이름만 둡니다.
+- Do not commit real API keys or project IDs. `.env.example` holds names only.
 
-## 완료 기준
+## Definition of done
 
-- `pnpm lint`, `pnpm typecheck`, `pnpm build` 통과
-- README: 데모 링크, 사용한 Onttle 기능, 실행 방법
-- BUILD_LOG 작성, `.env.example` 갱신
-- Vercel 배포: 프로젝트 `onttle-examples-<name>`, Root Directory `<name>`, `basePath: "/<name>"`, 공개 URL `https://example.onttle.com/<name>`
+- `pnpm lint`, `pnpm typecheck`, `pnpm build` pass
+- README: demo link, Onttle features used, how to run
+- BUILD_LOG written, `.env.example` updated
+- Vercel deployment: project `onttle-examples-<name>`, Root Directory `<name>`, `basePath: "/<name>"`, public URL `https://example.onttle.com/<name>`

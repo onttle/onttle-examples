@@ -10,7 +10,7 @@ import { topicLabel } from "@/lib/topics";
 export async function generateStaticParams() {
   const faqs = await listFaqs();
   const params = faqs.filter((f) => f.slug).map((f) => ({ slug: f.slug! }));
-  // Cache Components는 빈 배열을 허용하지 않음 → FAQ가 없을 때는 404가 나는 자리표시 경로 하나
+  // Cache Components does not allow an empty array → return one placeholder path (404) when there are no FAQs
   return params.length > 0 ? params : [{ slug: "_" }];
 }
 
@@ -31,7 +31,7 @@ async function FaqBody({ params }: { params: PageProps<"/faq/[slug]">["params"] 
     <article>
       <p className="text-sm text-neutral-500">{topicLabel(faq.data.topic?.name)}</p>
       <h1 className="mt-2 text-2xl font-bold leading-snug sm:text-3xl">{faq.data.question}</h1>
-      {/* answer는 TEXT 컬럼에 저장된 마크다운. raw HTML은 렌더링하지 않는다 */}
+      {/* answer is Markdown stored in a TEXT column. Raw HTML is not rendered */}
       <div className="prose prose-neutral mt-8 max-w-none dark:prose-invert">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{faq.data.answer ?? ""}</ReactMarkdown>
       </div>
@@ -51,15 +51,15 @@ async function FaqBody({ params }: { params: PageProps<"/faq/[slug]">["params"] 
 export default function FaqPage(props: PageProps<"/faq/[slug]">) {
   return (
     <>
-      <Suspense fallback={<p className="text-neutral-500">불러오는 중…</p>}>
+      <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
         <FaqBody params={props.params} />
       </Suspense>
       <div className="mt-16 flex justify-between text-sm">
         <Link href="/" className="hover:underline">
-          ← FAQ 목록
+          ← All FAQs
         </Link>
         <Link href="/ask" className="hover:underline">
-          해결되지 않았나요? AI에게 물어보기 →
+          Still stuck? Ask AI →
         </Link>
       </div>
     </>
