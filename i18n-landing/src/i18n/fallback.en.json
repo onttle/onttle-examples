@@ -1,0 +1,9 @@
+{
+  "nav": { "features": "Features", "pricing": "Pricing", "contact": "Contact" },
+  "hero": { "title": "Take notes together, in one place", "subtitle": "Start with a free trial.", "cta": "Start free trial" },
+  "features": { "heading": "Features" },
+  "pricing": { "heading": "Pricing", "per_month": "/ month", "popular": "Most popular", "free": "Free" },
+  "cta": { "title": "Ready to try Pageworks?", "button": "Get started" },
+  "footer": { "contact": "Contact", "copyright": "© Pageworks" },
+  "lang": { "switch": "한국어" }
+}

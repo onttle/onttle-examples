@@ -1,0 +1,9 @@
+{
+  "nav": { "features": "기능", "pricing": "요금제", "contact": "문의" },
+  "hero": { "title": "한곳에서 함께 메모하세요", "subtitle": "무료 체험으로 시작하세요.", "cta": "무료로 시작하기" },
+  "features": { "heading": "주요 기능" },
+  "pricing": { "heading": "요금제", "per_month": "/ 월", "popular": "가장 인기", "free": "무료" },
+  "cta": { "title": "페이지웍스를 직접 써 보세요", "button": "시작하기" },
+  "footer": { "contact": "문의", "copyright": "© 페이지웍스" },
+  "lang": { "switch": "English" }
+}
