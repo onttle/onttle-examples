@@ -3,6 +3,8 @@
   "cleanUrls": true,
   "rewrites": [
     { "source": "/blog", "destination": "https://onttle-examples-blog.vercel.app/blog" },
-    { "source": "/blog/:path*", "destination": "https://onttle-examples-blog.vercel.app/blog/:path*" }
+    { "source": "/blog/:path*", "destination": "https://onttle-examples-blog.vercel.app/blog/:path*" },
+    { "source": "/help-center", "destination": "https://onttle-examples-help-center.vercel.app/help-center" },
+    { "source": "/help-center/:path*", "destination": "https://onttle-examples-help-center.vercel.app/help-center/:path*" }
   ]
 }

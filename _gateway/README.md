@@ -5,6 +5,7 @@
 | 경로 | 예제 | 대상 Vercel 프로젝트 |
 | --- | --- | --- |
 | `/blog/*` | [blog](../blog) | `onttle-examples-blog` → `https://onttle-examples-blog.vercel.app/blog/*` |
+| `/help-center/*` | [help-center](../help-center) | `onttle-examples-help-center` → `https://onttle-examples-help-center.vercel.app/help-center/*` |
 
 ## 새 예제 추가
 
