@@ -6,6 +6,7 @@ The Vercel project that owns the `example.onttle.com` domain. It has no app code
 | --- | --- | --- |
 | `/blog/*` | [blog](../blog) | `onttle-examples-blog` → `https://onttle-examples-blog.vercel.app/blog/*` |
 | `/help-center/*` | [help-center](../help-center) | `onttle-examples-help-center` → `https://onttle-examples-help-center.vercel.app/help-center/*` |
+| `/i18n-landing/*` | [i18n-landing](../i18n-landing) | `onttle-examples-i18n-landing` → `https://onttle-examples-i18n-landing.vercel.app/i18n-landing/*` |
 
 ## Adding a new example
 
