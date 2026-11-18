@@ -7,7 +7,7 @@ import remarkGfm from "remark-gfm";
 import { BASE_PATH } from "@/lib/base-path";
 import type { AskResponse, AskSource } from "@/lib/ask-types";
 
-// 브라우저는 Onttle을 직접 부르지 않는다. 키는 서버(/api/ask)에만 있다.
+// The browser never calls Onttle directly. The key lives only on the server (/api/ask).
 
 type Turn =
   | { role: "user"; text: string }
@@ -15,10 +15,10 @@ type Turn =
   | { role: "error"; text: string };
 
 const ERRORS: Record<string, string> = {
-  too_long: "질문이 너무 깁니다. 조금 줄여서 다시 물어봐 주세요.",
-  empty: "질문을 입력해 주세요.",
-  turn_limit: "이 대화에서 물어볼 수 있는 횟수를 다 썼습니다. 새 대화를 시작해 주세요.",
-  config: "헬프센터 설정에 문제가 있어 답할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+  too_long: "Your question is too long. Please shorten it and ask again.",
+  empty: "Please enter a question.",
+  turn_limit: "You have used all the questions for this chat. Please start a new chat.",
+  config: "The help center is misconfigured and cannot answer right now. Please try again later.",
 };
 
 export function AskChat({ initialQuestion }: { initialQuestion: string }) {
@@ -44,7 +44,7 @@ export function AskChat({ initialQuestion }: { initialQuestion: string }) {
       });
       const body = (await res.json()) as AskResponse;
       if ("error" in body) {
-        setTurns((t) => [...t, { role: "error", text: ERRORS[body.error] ?? "답변을 받지 못했습니다. 잠시 후 다시 시도해 주세요." }]);
+        setTurns((t) => [...t, { role: "error", text: ERRORS[body.error] ?? "Could not get an answer. Please try again in a moment." }]);
         if (body.error === "turn_limit") setTurnsLeft(0);
       } else {
         setChatId(body.chatId);
@@ -52,7 +52,7 @@ export function AskChat({ initialQuestion }: { initialQuestion: string }) {
         setTurns((t) => [...t, { role: "assistant", text: body.message, sources: body.sources }]);
       }
     } catch {
-      setTurns((t) => [...t, { role: "error", text: "네트워크 오류로 답변을 받지 못했습니다." }]);
+      setTurns((t) => [...t, { role: "error", text: "Could not get an answer because of a network error." }]);
     } finally {
       setPending(false);
     }
@@ -80,7 +80,7 @@ export function AskChat({ initialQuestion }: { initialQuestion: string }) {
             {turn.role === "error" && <p className="text-sm text-red-600 dark:text-red-400">{turn.text}</p>}
           </li>
         ))}
-        {pending && <li className="text-sm text-neutral-500">FAQ를 찾아 답을 쓰는 중…</li>}
+        {pending && <li className="text-sm text-neutral-500">Looking through the FAQs and writing an answer…</li>}
       </ol>
 
       <form onSubmit={onSubmit} className="mt-8">
@@ -95,16 +95,16 @@ export function AskChat({ initialQuestion }: { initialQuestion: string }) {
           }}
           rows={3}
           disabled={exhausted}
-          placeholder={exhausted ? "새 대화를 시작해 주세요" : "예: 환불은 언제까지 되나요?"}
-          aria-label="질문"
+          placeholder={exhausted ? "Please start a new chat" : "e.g. How long do I have to get a refund?"}
+          aria-label="Question"
           className="w-full resize-none rounded-md border border-neutral-300 bg-transparent px-3 py-2 dark:border-neutral-700"
         />
         <div className="mt-2 flex items-center justify-between gap-4 text-sm">
           <span className="text-neutral-500">
-            {turnsLeft !== null && `남은 질문 ${turnsLeft}회`}
+            {turnsLeft !== null && `${turnsLeft} ${turnsLeft === 1 ? "question" : "questions"} left`}
             {turns.length > 0 && (
               <button type="button" onClick={reset} className="ml-3 underline">
-                새 대화
+                New chat
               </button>
             )}
           </span>
@@ -112,7 +112,7 @@ export function AskChat({ initialQuestion }: { initialQuestion: string }) {
             disabled={pending || exhausted || !input.trim()}
             className="rounded-md bg-neutral-900 px-4 py-2 text-white disabled:opacity-40 dark:bg-neutral-100 dark:text-neutral-900"
           >
-            보내기
+            Send
           </button>
         </div>
       </form>
@@ -128,7 +128,7 @@ function Answer({ text, sources }: { text: string; sources: AskSource[] }) {
       </div>
       {sources.length > 0 ? (
         <div className="mt-4 border-t border-neutral-200 pt-3 dark:border-neutral-800">
-          <p className="mb-2 text-xs text-neutral-500">출처</p>
+          <p className="mb-2 text-xs text-neutral-500">Sources</p>
           <ul className="space-y-1 text-sm">
             {sources.map((s) => (
               <li key={s.slug}>
@@ -142,9 +142,9 @@ function Answer({ text, sources }: { text: string; sources: AskSource[] }) {
         </div>
       ) : (
         <p className="mt-3 text-xs text-neutral-500">
-          관련 FAQ를 찾지 못했습니다.{" "}
+          No related FAQs found.{" "}
           <Link href="/" className="underline">
-            FAQ 목록 보기
+            Browse all FAQs
           </Link>
         </p>
       )}

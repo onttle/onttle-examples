@@ -3,18 +3,18 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
 /**
- * Onttle REST API 호출을 한곳에 모은 모듈.
- * - 서버 전용: 클라이언트 컴포넌트에서 import하면 빌드가 실패한다 (server-only).
- * - 경로·파라미터는 프로젝트 OpenAPI 명세 기준:
- *   GET  /tables/{table}?page&size&sort&filter   목록 (발행된 글만 반환)
- *   GET  /tables/{table}/{id}                    단건 ({id}는 content id 또는 slug)
- *   POST /tables/{table}/bm25                    키워드 검색 (시크릿 키 필요)
+ * All Onttle REST API calls live in this module.
+ * - Server only: importing it from a client component fails the build (server-only).
+ * - Paths and parameters follow the project's OpenAPI spec:
+ *   GET  /tables/{table}?page&size&sort&filter   list (published posts only)
+ *   GET  /tables/{table}/{id}                    single item ({id} is a content id or slug)
+ *   POST /tables/{table}/bm25                    keyword search (needs a secret key)
  */
 
 export const POSTS_TABLE = "posts";
 export const PAGE_SIZE = 10;
 
-// ---------- 타입 (Onttle TypeScript 메뉴의 PostsResponse를 옮긴 것) ----------
+// ---------- Types (copied from PostsResponse in Onttle's TypeScript menu) ----------
 
 export interface ProjectFile {
   id: string;
@@ -34,10 +34,10 @@ export interface Post {
   data: {
     title: string;
     excerpt: string | null;
-    /** TEXT(textarea) 컬럼에 마크다운으로 저장 */
+    /** Stored as Markdown in a TEXT (textarea) column */
     body: string | null;
     cover_image: ProjectFile | null;
-    /** TEXT(multiple) 컬럼: 태그 이름 배열 */
+    /** TEXT (multiple) column: array of tag names */
     tags: string[] | null;
   };
 }
@@ -48,7 +48,7 @@ export interface Pagination {
   totalPages: number;
 }
 
-// ---------- 공통 fetch ----------
+// ---------- Shared fetch ----------
 
 export class OnttleError extends Error {
   constructor(
@@ -81,7 +81,7 @@ async function onttle<T>(path: string, init?: RequestInit): Promise<T> {
     },
   });
   if (!res.ok) {
-    // 응답 본문·키는 로그나 화면에 남기지 않는다. 상태 코드와 경로만.
+    // Never log or show the response body or the key. Status code and path only.
     throw new OnttleError(res.status, `Onttle ${init?.method ?? "GET"} ${path} → ${res.status}`);
   }
   return (await res.json()) as T;
@@ -101,7 +101,7 @@ function listQuery(page: number, size: number) {
   return params.toString();
 }
 
-// ---------- 조회 함수 (캐시: 5분 + "posts" 태그로 즉시 무효화) ----------
+// ---------- Read functions (cache: 5 minutes + instant invalidation with the "posts" tag) ----------
 
 export async function listPosts(page = 1): Promise<{ posts: Post[]; pagination: Pagination }> {
   "use cache";
@@ -116,7 +116,7 @@ export async function listPosts(page = 1): Promise<{ posts: Post[]; pagination: 
   };
 }
 
-/** 모든 발행 글. 페이지를 끝까지 돌며 모은다 (generateStaticParams·태그 페이지용). */
+/** All published posts, collected page by page (for generateStaticParams and tag pages). */
 export async function listAllPosts(): Promise<Post[]> {
   "use cache";
   cacheTag("posts");
@@ -150,7 +150,7 @@ export interface Tag {
   count: number;
 }
 
-/** 발행 글에 실제로 달린 태그와 글 수. */
+/** Tags actually used on published posts, with post counts. */
 export async function listTags(): Promise<Tag[]> {
   const posts = await listAllPosts();
   const counts = new Map<string, number>();
@@ -163,7 +163,7 @@ export async function listPostsByTag(tag: string): Promise<Post[]> {
   return posts.filter((p) => p.data.tags?.includes(tag));
 }
 
-// ---------- 검색 (BM25, 시크릿 키 필요 → 서버에서만) ----------
+// ---------- Search (BM25, needs a secret key → server only) ----------
 
 interface Bm25Response {
   list: (Post & { score: number; bm25_score: number })[];
@@ -177,15 +177,15 @@ export async function searchPosts(query: string): Promise<Post[]> {
 
   const res = await onttle<Bm25Response>(`/tables/${POSTS_TABLE}/bm25`, {
     method: "POST",
-    // rerank: false → AI 토큰을 쓰지 않는 순수 키워드 검색
+    // rerank: false → pure keyword search that uses no AI tokens
     body: JSON.stringify({ query, count: 20, rerank: false }),
   });
-  // 검색은 Vector 동기화된 텍스트 기준이라, 발행 목록에 있는 글만 남긴다.
+  // Search runs on Vector-synced text, so keep only posts that are in the published list.
   const published = new Set((await listAllPosts()).map((p) => p.id));
   return res.list.filter((p) => published.has(p.id));
 }
 
-// ---------- 표시용 헬퍼 ----------
+// ---------- Display helpers ----------
 
 export function postHref(post: Post) {
   return `/posts/${encodeURIComponent(post.slug ?? post.id)}`;
@@ -197,5 +197,5 @@ export function coverUrl(post: Post): string | null {
 
 export function formatDate(iso: string | null) {
   if (!iso) return "";
-  return new Intl.DateTimeFormat("ko-KR", { dateStyle: "long", timeZone: "Asia/Seoul" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("en-US", { dateStyle: "long", timeZone: "Asia/Seoul" }).format(new Date(iso));
 }

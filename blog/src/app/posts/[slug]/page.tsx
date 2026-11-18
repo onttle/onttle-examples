@@ -8,11 +8,11 @@ import remarkGfm from "remark-gfm";
 import { TagLinks } from "@/components/tag-links";
 import { coverUrl, formatDate, getPostBySlug, listPosts } from "@/lib/onttle";
 
-// 빌드 때는 최신 글 첫 페이지만 미리 만들고, 나머지는 첫 요청 때 생성해 캐시한다.
+// At build time only the first page of latest posts is prerendered; the rest are generated on first request and cached.
 export async function generateStaticParams() {
   const { posts } = await listPosts(1);
   const params = posts.filter((p) => p.slug).map((p) => ({ slug: p.slug! }));
-  // Cache Components는 빈 배열을 허용하지 않음 → 글이 없을 때는 404가 나는 자리표시 경로 하나
+  // Cache Components does not allow an empty array → return one placeholder path (404) when there are no posts
   return params.length > 0 ? params : [{ slug: "_" }];
 }
 
@@ -61,7 +61,7 @@ async function PostBody({ params }: { params: PageProps<"/posts/[slug]">["params
           className="mb-10 w-full rounded-lg border border-neutral-200 dark:border-neutral-800"
         />
       )}
-      {/* body는 TEXT 컬럼에 저장된 마크다운. raw HTML은 렌더링하지 않는다 */}
+      {/* body is Markdown stored in a TEXT column. Raw HTML is not rendered */}
       <div className="prose prose-neutral max-w-none dark:prose-invert">
         <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.data.body ?? ""}</ReactMarkdown>
       </div>
@@ -72,12 +72,12 @@ async function PostBody({ params }: { params: PageProps<"/posts/[slug]">["params
 export default function PostPage(props: PageProps<"/posts/[slug]">) {
   return (
     <>
-      <Suspense fallback={<p className="text-neutral-500">불러오는 중…</p>}>
+      <Suspense fallback={<p className="text-neutral-500">Loading…</p>}>
         <PostBody params={props.params} />
       </Suspense>
       <p className="mt-16 text-sm">
         <Link href="/" className="hover:underline">
-          ← 글 목록
+          ← All posts
         </Link>
       </p>
     </>

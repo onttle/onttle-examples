@@ -3,20 +3,20 @@ import "server-only";
 import { cacheLife, cacheTag } from "next/cache";
 
 /**
- * Onttle REST API 호출을 한곳에 모은 모듈.
- * - 서버 전용: 클라이언트 컴포넌트에서 import하면 빌드가 실패한다 (server-only).
- * - 경로·필드는 002-help-center 프로젝트의 OpenAPI 명세와 Onttle 문서(Chats, 카테고리) 기준:
- *   GET  /tables/{table}?page&size&sort        FAQ 목록 (발행된 것만)
- *   GET  /tables/{table}/{id}                  FAQ 단건 ({id}는 content id 또는 slug)
- *   POST /tables/{table}/embeddings            의미 검색 (시크릿 키)
- *   GET  /categories                           카테고리와 값 (저장 순서)
- *   POST /chats                                새 대화 (text/plain 스트림 → 이어 붙이면 JSON)
- *   POST /chats/{chatId}/messages              대화 이어가기 (같은 형식)
- *   GET  /chats/{chatId}/messages?lastId=      메시지 이력 (최대 20개, 참조 콘텐츠·점수 포함)
- *   faqs 테이블은 slug가 없어 {table} 자리에 테이블 ID를 쓴다 (ONTTLE_FAQ_TABLE_ID).
+ * All Onttle REST API calls live in this module.
+ * - Server only: importing it from a client component fails the build (server-only).
+ * - Paths and fields follow the 002-help-center project's OpenAPI spec and the Onttle docs (Chats, Categories):
+ *   GET  /tables/{table}?page&size&sort        FAQ list (published only)
+ *   GET  /tables/{table}/{id}                  single FAQ ({id} is a content id or slug)
+ *   POST /tables/{table}/embeddings            semantic search (secret key)
+ *   GET  /categories                           categories and their values (stored order)
+ *   POST /chats                                new chat (text/plain stream → concatenated, it is JSON)
+ *   POST /chats/{chatId}/messages              continue a chat (same format)
+ *   GET  /chats/{chatId}/messages?lastId=      message history (up to 20, with referenced contents and scores)
+ *   The faqs table has no slug, so the table ID goes in {table} (ONTTLE_FAQ_TABLE_ID).
  */
 
-// ---------- 타입 (Onttle TypeScript 메뉴의 FaqsResponse를 옮긴 것) ----------
+// ---------- Types (copied from FaqsResponse in Onttle's TypeScript menu) ----------
 
 export interface Category {
   id: string;
@@ -31,10 +31,10 @@ export interface Faq {
   published_at: string | null;
   data: {
     question: string;
-    /** TEXT(textarea) 컬럼에 마크다운으로 저장 */
+    /** Stored as Markdown in a TEXT (textarea) column */
     answer: string | null;
     topic: Category | null;
-    /** TEXT(multiple) 컬럼 */
+    /** TEXT (multiple) column */
     keywords: string[] | null;
     order: number | null;
   };
@@ -42,7 +42,7 @@ export interface Faq {
 
 export type ScoredFaq = Faq & { score: number };
 
-// ---------- 공통 fetch ----------
+// ---------- Shared fetch ----------
 
 export class OnttleError extends Error {
   constructor(
@@ -61,7 +61,7 @@ function env(name: string) {
 }
 
 function config() {
-  // https://api.onttle.com 과 https://api.onttle.com/v1 둘 다 받는다
+  // Accepts both https://api.onttle.com and https://api.onttle.com/v1
   const apiUrl = (process.env.ONTTLE_API_URL ?? "https://api.onttle.com").replace(/\/+$/, "").replace(/\/v1$/, "");
   return { base: `${apiUrl}/v1/${env("ONTTLE_PROJECT_ID")}`, apiKey: env("ONTTLE_API_KEY") };
 }
@@ -81,7 +81,7 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
     },
   });
   if (!res.ok) {
-    // 응답 본문·키는 로그나 화면에 남기지 않는다. 상태 코드와 경로만.
+    // Never log or show the response body or the key. Status code and path only.
     throw new OnttleError(res.status, `Onttle ${init?.method ?? "GET"} ${path} → ${res.status}`);
   }
   return res;
@@ -96,13 +96,13 @@ interface ListResponse<T> {
   pagination: { page: number; size: number; total: number; totalPages: number };
 }
 
-// ---------- FAQ 목록·단건 (캐시: 5분 + "faqs" 태그로 즉시 무효화) ----------
+// ---------- FAQ list and single item (cache: 5 minutes + instant invalidation with the "faqs" tag) ----------
 
 /**
- * 발행된 FAQ 전부, order 오름차순.
- * 실제 API에서 확인한 것 (BUILD_LOG 참고):
- * - 명세는 size 최대 1000이지만 100·1000을 보내면 50으로 돌아온다 → 50씩, 응답의 totalPages까지 돈다.
- * - sort는 created_at 같은 기본 필드에만 먹고 사용자 컬럼(order)은 무시된다 → 서버에서 정렬한다.
+ * All published FAQs, in ascending order.
+ * Observed on the real API (see BUILD_LOG):
+ * - The spec says size goes up to 1000, but 100 and 1000 come back as 50 → request 50 at a time up to the response's totalPages.
+ * - sort only works on built-in fields such as created_at and is ignored for user columns (order) → sort on the server.
  */
 export async function listFaqs(): Promise<Faq[]> {
   "use cache";
@@ -139,7 +139,7 @@ interface CategoryGroup {
   categories_values: Category[];
 }
 
-/** topic 카테고리의 값 목록 (대시보드에 저장한 순서). */
+/** Values of the topic category (in the order stored in the dashboard). */
 export async function listTopics(): Promise<Category[]> {
   "use cache";
   cacheTag("faqs");
@@ -149,25 +149,26 @@ export async function listTopics(): Promise<Category[]> {
   return groups.find((g) => g.name === "topic")?.categories_values ?? [];
 }
 
-// ---------- 의미 검색 (Embeddings, 시크릿 키 → 서버에서만, 캐시하지 않음) ----------
+// ---------- Semantic search (Embeddings, secret key → server only, not cached) ----------
 
 /**
- * 한글 구어체 질문은 정답 FAQ도 0.3~0.4대로 나오고, 상관없는 질문("오늘 날씨")도 0.32까지 나온다.
- * 0.35로 두어 잡음은 숨기고, 결과가 없으면 AI 질문으로 안내한다 (BUILD_LOG의 측정값).
+ * Measured with the English FAQs: the right FAQ scored 0.56 or higher for 8 of 8 test questions,
+ * and unrelated questions ("pasta recipe") stayed at 0.24 or lower. 0.4 sits between the two.
+ * With no results the page points to Ask AI (measurements in BUILD_LOG).
  */
-export const SEARCH_THRESHOLD = 0.35;
+export const SEARCH_THRESHOLD = 0.4;
 
 export async function searchFaqs(query: string): Promise<ScoredFaq[]> {
   const res = await onttle<{ list: ScoredFaq[] }>(`/tables/${faqTable()}/embeddings`, {
     method: "POST",
     body: JSON.stringify({ query, threshold: SEARCH_THRESHOLD, count: 10 }),
   });
-  // 임베딩은 Vector 동기화 시점 기준이라, 지금 발행 목록에 있는 FAQ만 남긴다.
+  // Embeddings reflect the last Vector sync, so keep only FAQs that are in the published list now.
   const published = new Set((await listFaqs()).map((f) => f.id));
   return res.list.filter((f) => published.has(f.id));
 }
 
-// ---------- Chats (시크릿 키 → 서버에서만, 캐시하지 않음) ----------
+// ---------- Chats (secret key → server only, not cached) ----------
 
 const SEARCH_TYPES = ["vector", "query", "hybrid", "bm25"] as const;
 export type SearchType = (typeof SEARCH_TYPES)[number];
@@ -177,7 +178,7 @@ function searchType(): SearchType {
   return SEARCH_TYPES.find((t) => t === value) ?? "hybrid";
 }
 
-/** 스트림 응답을 이어 붙인 결과. 새 대화에는 chatId, 이어가기에는 chatMessageId가 온다 (Chats 문서). */
+/** The concatenated stream response. A new chat carries chatId, a follow-up carries chatMessageId (Chats docs). */
 export interface ChatReply {
   chatId?: string;
   chatMessageId?: string;
@@ -186,10 +187,11 @@ export interface ChatReply {
 }
 
 /**
- * Chats 검색 최소 점수. 기본 0.7이면 "돈 돌려받고 싶어요" 같은 구어체 질문(정답 FAQ 0.39)이
- * 근거를 하나도 못 찾는다. 0.3에서도 "오늘 날씨" 같은 질문은 Agent가 모른다고 답했다 (BUILD_LOG).
+ * Minimum score for Chats retrieval. At the default 0.7 a colloquial question such as "I want my money back"
+ * (right FAQ: 0.56) finds no grounding at all. At 0.4 it is answered from the refund FAQ, and the Agent still
+ * says it does not know for questions like "what is the weather today" (see BUILD_LOG).
  */
-export const CHAT_THRESHOLD = 0.3;
+export const CHAT_THRESHOLD = 0.4;
 
 function chatBody(message: string) {
   return JSON.stringify({
@@ -202,7 +204,7 @@ function chatBody(message: string) {
   });
 }
 
-/** text/plain 스트림을 끝까지 읽어 하나의 JSON으로. SSE도, res.json()도 아니다. */
+/** Reads the text/plain stream to the end and parses it as one JSON object. It is neither SSE nor res.json(). */
 async function readChatStream(res: Response): Promise<ChatReply> {
   const reader = res.body!.getReader();
   const decoder = new TextDecoder();
@@ -226,7 +228,7 @@ export async function sendMessage(chatId: string, message: string): Promise<Chat
   );
 }
 
-/** 참조 콘텐츠. 실측: 스트림 contents의 id는 slug, 이력 connections의 id는 content UUID (BUILD_LOG). 둘 다 받는다. */
+/** A referenced content. Observed: the id is a slug in the stream's contents and a content UUID in the history connections (see BUILD_LOG). Both are accepted. */
 export interface ContentRef {
   id: string;
   table_id: string;
@@ -235,22 +237,22 @@ export interface ContentRef {
 export interface ChatMessage {
   id: string;
   created_at: string;
-  /** null이면 사용자 메시지, 값이 있으면 AI 답변 */
+  /** null for a user message, set for an AI reply */
   agent_id: string | null;
   message: string;
-  /** 문서에는 contents에 slug·title·data가 있다고 나오지만, 실제로는 { id, table_id }뿐이었다 */
-  /** score는 실제로 문자열로 왔다 (문서 예시는 숫자) */
+  /** The docs show slug, title and data on contents, but real responses had only { id, table_id } */
+  /** score actually arrived as a string (the docs example shows a number) */
   chat_messages_contents_connections: { id: string; order: number; score: number | string; contents: ContentRef }[];
 }
 
-/** 오래된 순 최대 20개. lastId를 주면 그 뒤에 생긴 메시지만. */
+/** Oldest first, up to 20. With lastId, only messages created after it. */
 export async function getMessages(chatId: string, lastId?: string): Promise<ChatMessage[]> {
   const query = lastId ? `?${new URLSearchParams({ lastId })}` : "";
   const res = await onttle<{ data: ChatMessage[] }>(`/chats/${encodeURIComponent(chatId)}/messages${query}`);
   return res.data;
 }
 
-// ---------- 표시용 헬퍼 ----------
+// ---------- Display helpers ----------
 
 export function faqHref(faq: { slug: string | null; id: string }) {
   return `/faq/${encodeURIComponent(faq.slug ?? faq.id)}`;

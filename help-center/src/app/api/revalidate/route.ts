@@ -2,10 +2,10 @@ import { revalidateTag } from "next/cache";
 import { timingSafeEqual } from "node:crypto";
 
 /**
- * Onttle 웹훅(콘텐츠 CREATED/UPDATED/DELETED)이나 수동 호출로 FAQ 캐시를 비운다.
+ * Clears the FAQ cache from an Onttle webhook (content CREATED/UPDATED/DELETED) or a manual call.
  *   POST /help-center/api/revalidate
  *   Authorization: Bearer <REVALIDATE_SECRET>
- * 검색·AI 답변은 Vector 동기화 기준이라, FAQ를 고치면 대시보드에서 재동기화도 해야 한다.
+ * Search and AI answers follow the Vector sync, so after editing an FAQ you also need to re-sync in the dashboard.
  */
 export async function POST(request: Request) {
   const secret = process.env.REVALIDATE_SECRET;

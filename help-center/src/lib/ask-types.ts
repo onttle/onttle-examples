@@ -1,4 +1,4 @@
-// /api/ask 요청·응답 모양. 클라이언트와 Route Handler가 함께 쓴다 (Onttle 타입과는 별개).
+// Request and response shapes of /api/ask, shared by the client and the Route Handler (separate from the Onttle types).
 
 export interface AskRequest {
   message: string;
@@ -8,13 +8,13 @@ export interface AskRequest {
 export interface AskSource {
   slug: string;
   question: string;
-  /** Onttle이 돌려준 유사도 점수 (없으면 null) */
+  /** Similarity score returned by Onttle (null when missing) */
   score: number | null;
 }
 
 export type AskError = "empty" | "too_long" | "turn_limit" | "bad_request" | "config" | "failed";
 
 export type AskResponse =
-  /** chatId가 null이면 이 대화를 이어갈 수 없다 → 다음 질문은 새 대화로 */
+  /** A null chatId means this chat cannot be continued → the next question starts a new chat */
   | { chatId: string | null; message: string; sources: AskSource[]; turnsLeft: number }
   | { error: AskError };
