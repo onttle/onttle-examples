@@ -121,7 +121,12 @@ Vector 동기화 후 실제 검색·AI 대화 확인 (2026-11-18): 아래 4절 �
 ### 7단계 — 배포·문서
 
 - `_gateway/vercel.json` rewrite 2줄, `_gateway/public/index.html`, `_gateway/README.md`, 루트 README 표에 추가.
-- TODO: Vercel 프로젝트 `onttle-examples-help-center` 생성(Root Directory `help-center`), 환경변수 등록, 배포 확인.
+- Vercel 프로젝트 `onttle-examples-help-center` (2026-11-18): CLI `vercel project add` → MCP `update_project`로 Root Directory `help-center`, Framework Next.js → `vercel link` + `vercel git connect`(GitHub 저장소 연결).
+  - 새 프로젝트의 기본 Deployment Protection이 `all_except_custom_domains`라 `*.vercel.app` 프로덕션 주소까지 Vercel 로그인이 걸림 → 게이트웨이 프록시가 막힘. blog와 같은 `prod_deployment_urls_and_all_previews`로 바꿈.
+  - 환경변수 9개를 production·preview에 등록 (`.env.local`에서 CLI로 바로 넘겨 값은 출력하지 않음). `NEXT_PUBLIC_SITE_URL`은 `https://example.onttle.com/help-center`. 팀 정책으로 일반 값도 sensitive/encrypted로 저장됨.
+  - `vercel deploy --prod`로 PR 브랜치 코드를 프로덕션 배포 → `onttle-examples-help-center.vercel.app/help-center`에서 목록·상세·검색·AI 대화·재검증(401) 확인.
+  - 그 배포에서 AI 대화 1회의 출처 점수가 `null` (출처 자체는 맞음). 로컬에서는 점수가 있었음 → 이력 GET이 방금 메시지 저장보다 먼저 읽혔을 가능성. TODO: 재현 확인
+  - `example.onttle.com/help-center`는 게이트웨이 rewrite가 PR에만 있어 머지 전까지 404.
 
 ## 3. 막힌 점과 우회
 
