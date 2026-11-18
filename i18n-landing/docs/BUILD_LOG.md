@@ -123,7 +123,9 @@
 ### 7단계 — 배포·문서
 
 - `_gateway/vercel.json` rewrite 2줄, `_gateway/public/index.html` 목록, `_gateway/README.md` 표, 루트 README 표, `i18n-landing/README.md`, `.env.example` 작성.
-- TODO: Vercel 프로젝트 `onttle-examples-i18n-landing` 생성(Root Directory `i18n-landing`, 환경변수 등록, Deployment Protection은 blog·help-center와 같게), 배포 후 `https://example.onttle.com/i18n-landing/ko`·`/en` 확인. 게이트웨이를 거친 리다이렉트의 `Location`이 `example.onttle.com` 기준으로 나오는지도 이때 확인.
+- Vercel 프로젝트 `onttle-examples-i18n-landing` 생성 (Vercel MCP): Root Directory `i18n-landing`, 저장소 연결, 환경변수 7개(Production·Preview, 키와 `REVALIDATE_SECRET`은 Sensitive). 새 프로젝트의 Deployment Protection 기본값이 `all_except_custom_domains`라 `*.vercel.app` 주소까지 막혀 게이트웨이가 프록시할 수 없음 → help-center와 같은 `prod_deployment_urls_and_all_previews`로 바꿈.
+- PR 브랜치로 첫 배포. 프로젝트의 첫 배포라 Production으로 올라감. `onttle-examples-i18n-landing.vercel.app/i18n-landing`에서 확인: `/` → 307 `/i18n-landing/ko`(`Location`이 상대 경로), `Accept-Language: en` → `/en`, `/ja` → 404, `/ko`는 `x-vercel-cache: PRERENDER`, `hreflang`은 `example.onttle.com` 기준, 재검증 200.
+- TODO: PR 머지 뒤 게이트웨이를 거친 `https://example.onttle.com/i18n-landing/ko`·`/en` 확인.
 - TODO: 캡처 6개 (`docs/assets/01~06`).
 - TODO: #onttle-content에 완료 알림.
 
