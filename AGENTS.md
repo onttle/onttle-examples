@@ -8,7 +8,7 @@ AI coding agents and people both follow these rules.
 - `<name>/docs/BUILD_LOG.md`: the build record (prompts per step, what the agent got wrong, where it got stuck).
 - `<name>/docs/POST.md`: the post written from this example. Front matter `status: draft | published`.
 - `<name>/docs/assets/`: screenshots and GIFs.
-- `_gateway/`: the exception. It is not an app but the `example.onttle.com` router (`vercel.json` rewrites + the index page). When you add an example, register it here too ([_gateway/README.md](_gateway/README.md)).
+- `_gateway/`: the exception. It is not an app but the `example.onttle.com` router (`vercel.json` rewrites + the index page). When you add an example, register it here too: two rewrite lines in `_gateway/vercel.json` (`/<name>` and `/<name>/:path*` → `https://onttle-examples-<name>.vercel.app/<name>…`) and one list item in `_gateway/public/index.html`.
 
 ## Onttle API
 
