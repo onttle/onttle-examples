@@ -8,6 +8,7 @@ The Vercel project that owns the `example.onttle.com` domain. It has no app code
 | `/help-center/*` | [help-center](../help-center) | `onttle-examples-help-center` → `https://onttle-examples-help-center.vercel.app/help-center/*` |
 | `/i18n-landing/*` | [i18n-landing](../i18n-landing) | `onttle-examples-i18n-landing` → `https://onttle-examples-i18n-landing.vercel.app/i18n-landing/*` |
 | `/feedback-board/*` | [feedback-board](../feedback-board) | `onttle-examples-feedback-board` → `https://onttle-examples-feedback-board.vercel.app/feedback-board/*` |
+| `/event-rsvp/*` | [event-rsvp](../event-rsvp) | `onttle-examples-event-rsvp` → `https://onttle-examples-event-rsvp.vercel.app/event-rsvp/*` |
 
 ## Adding a new example
 
