@@ -5,7 +5,6 @@ A Next.js help center example: FAQs live in Onttle, and when a visitor asks a qu
 "Noteforge" is a fictional service for this example. No real company documents are used, so the answers cannot be mistaken for real guidance.
 
 - Demo: https://example.onttle.com/help-center
-- Plan: [Onttle example plan — help-center](https://claude.ai/artifact/1JKCqrzewqd8gEgkVyyC2v) (in Korean)
 - Build record: [docs/BUILD_LOG.md](docs/BUILD_LOG.md) (in Korean)
 
 ## Screens
@@ -99,7 +98,6 @@ Each question uses AI tokens (`AI_ASK_TOKENS`) and each search uses embedding to
 
 - Project `onttle-examples-help-center`, Root Directory `help-center`. The environment variables above are stored in Vercel only.
 - `basePath: "/help-center"`. Use `next/link` for links and `next/form` for forms so the basePath is added. Client-side `fetch` does not add it, so calls prepend the value from [`src/lib/base-path.ts`](src/lib/base-path.ts).
-- The public domain `example.onttle.com` belongs to the [`_gateway`](../_gateway) project, which proxies `/help-center/*` to `onttle-examples-help-center.vercel.app/help-center/*`.
 
 ## Not included
 

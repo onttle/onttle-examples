@@ -3,7 +3,6 @@
 A Next.js tech blog example that uses Onttle as a headless CMS. Posts are written in the Onttle CMS, and this app reads them through the REST API.
 
 - Demo: https://example.onttle.com/blog
-- Plan: [Onttle example plan — blog](https://claude.ai/artifact/6viTrCwX8pS16NGpje9Zii) (in Korean)
 - Build record: [docs/BUILD_LOG.md](docs/BUILD_LOG.md) (in Korean)
 
 ## Screens
@@ -80,7 +79,6 @@ Register this URL and the `Authorization` header as an Onttle webhook, and it is
 
 - Project `onttle-examples-blog`, Root Directory `blog`. The environment variables above are stored in Vercel only.
 - `basePath: "/blog"` in `next.config.ts` puts every path under `/blog`. Use `next/link` for links and `next/form` for forms so the basePath is added.
-- The public domain `example.onttle.com` belongs to the [`_gateway`](../_gateway) project, which proxies `/blog/*` to `onttle-examples-blog.vercel.app/blog/*`.
 
 ## Not included
 
