@@ -125,4 +125,6 @@ REFERENCE creation failing twice (section 1) is the tool's behavior, not a guess
 ## 6. Left to do
 
 - Gateway change committed to main (live already, from the local files); connect git
-- Dashboard edit → no webhook (the person has to edit a row); screenshots 02–06 in `docs/assets/`; `docs/POST.md`
+- Dashboard edit → no webhook: the person has to edit a row in the dashboard and capture the empty webhook log (`06-dashboard-edit-no-event.png`)
+- Captures that need the dashboard or a recording: `02-webhook-settings.png` (the built-in browser is not signed in to app.onttle.com), `03-rsvp-seats.gif` (two tabs; needs one more test RSVP). `04-full.png` is saved. `05-bad-signature.png` is replaced by the response as text in `docs/POST.md`; `01-ai-design.png` does not exist (section 1)
+- `docs/POST.md` is a draft (angle 2, "the webhook comes once"); its header comment lists what to fill before publishing
