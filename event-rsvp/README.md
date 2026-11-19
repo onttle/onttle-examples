@@ -125,4 +125,4 @@ The demo collects real e-mail addresses from whoever tries it, so they are delet
 
 ## Deployment
 
-Vercel project `onttle-examples-event-rsvp`, Root Directory `event-rsvp`, served at `https://example.onttle.com/event-rsvp` through [_gateway](../_gateway). Set the seven variables above in Vercel (the secret key and the signing key as Sensitive).
+Vercel project `onttle-examples-event-rsvp`, Root Directory `event-rsvp`, served at `https://example.onttle.com/event-rsvp`. Set the seven variables above in Vercel (the secret key and the signing key as Sensitive).

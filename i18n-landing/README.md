@@ -104,7 +104,6 @@ Changes to features and plans can call the same URL from a webhook. Webhook requ
 
 - Project `onttle-examples-i18n-landing`, Root Directory `i18n-landing`. The environment variables above are stored in Vercel only.
 - `basePath: "/i18n-landing"`. Internal links use `next/link` so the basePath is added.
-- The public domain `example.onttle.com` belongs to the [`_gateway`](../_gateway) project, which proxies `/i18n-landing/*` to `onttle-examples-i18n-landing.vercel.app/i18n-landing/*`.
 
 ## Not included
 

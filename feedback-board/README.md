@@ -102,4 +102,4 @@ pnpm build
 
 ## Deployment
 
-Vercel project `onttle-examples-feedback-board`, Root Directory `feedback-board`, served at `https://example.onttle.com/feedback-board` through [_gateway](../_gateway). Set the five variables above in Vercel (the key as Sensitive).
+Vercel project `onttle-examples-feedback-board`, Root Directory `feedback-board`, served at `https://example.onttle.com/feedback-board`. Set the five variables above in Vercel (the key as Sensitive).
