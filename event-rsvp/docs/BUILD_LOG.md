@@ -117,6 +117,7 @@ REFERENCE creation failing twice (section 1) is the tool's behavior, not a guess
 | Dashboard edit sends an event? | TODO (docs say no) |
 | MCP write sends an event? | **No.** `onttle_create_contents` (PUBLISHED) at 11:25:21Z; the webhook log stayed at 4. The docs list dashboard edits as not firing and do not mention MCP. The list still said 28 seats left 75 s later and 27 at 95 s: the 60-second fallback did its job |
 | 3 RSVPs at once for 1 seat: how many got in | **3 of 3 saved** (rows created within 0.25 s). The first by `created_at` saw "You're in"; the other two saw "Almost … saved beyond the seat limit". The workshop now holds 5 rows for 3 seats and shows Full, 3 / 3 |
+| MCP delete sends an event? | **No.** The six test rows ("Test visitor 1–6") were deleted with `onttle_delete_contents` on the person's "yes, delete"; the webhook log stayed at 4, so **DELETED was never delivered in this build** and is only covered by the signature test. The site caught up through the 60-second revalidation: the first request after the window still got the old number, the next one the new one (list 30 / 1 seat left / Full, workshop page "1 seat left") |
 | Webhook Requests (Workspace → Usage), write calls | TODO |
 | Vercel deploys | event-rsvp 4 (0 failed; 2 for the signing key, 1 for the redirect fix and the GitHub link), gateway 1, the other four examples 1 each |
 | Time spent | TODO |
@@ -124,9 +125,4 @@ REFERENCE creation failing twice (section 1) is the tool's behavior, not a guess
 ## 6. Left to do
 
 - Gateway change committed to main (live already, from the local files); connect git
-- Dashboard edit → no webhook (the person has to edit a row); deleting the test rows; screenshots 02–06 in `docs/assets/`; `docs/POST.md`
-- Delete the test registrations in the dashboard:
-  - `f75b47fb-7796-4791-83e8-021dc035a136` — "Test visitor 1", December Talk Night, local form
-  - `a90ba864-8290-49c4-93e5-eee6b1b337a8` — "Test visitor 2", December Talk Night, deployed form
-  - `1131b26d-ede7-4b28-849f-9fdc765ec052`, `e6cbca76-a789-4fd4-bdd4-2fc0fda01e0f`, `b8639ae6-0e48-444e-97e8-803955dc350a` — "Test visitor 4 / 3 / 5", workshop, race test
-  - `daa32264-a229-4857-a595-e0cb6931b5f5` — "Test visitor 6", December Talk Night, MCP write
+- Dashboard edit → no webhook (the person has to edit a row); screenshots 02–06 in `docs/assets/`; `docs/POST.md`
