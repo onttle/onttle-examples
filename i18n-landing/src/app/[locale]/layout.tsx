@@ -1,3 +1,4 @@
+import { SourceLink } from "@/components/source-link";
 import { defaultLocale, isLocale, locales } from "@/i18n/locales";
 import "../globals.css";
 
@@ -10,7 +11,10 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[lo
   const { locale } = await params;
   return (
     <html lang={isLocale(locale) ? locale : defaultLocale} className="h-full antialiased">
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <SourceLink />
+      </body>
     </html>
   );
 }
