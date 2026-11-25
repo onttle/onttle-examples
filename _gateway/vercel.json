@@ -11,6 +11,8 @@
     { "source": "/feedback-board", "destination": "https://onttle-examples-feedback-board.vercel.app/feedback-board" },
     { "source": "/feedback-board/:path*", "destination": "https://onttle-examples-feedback-board.vercel.app/feedback-board/:path*" },
     { "source": "/event-rsvp", "destination": "https://onttle-examples-event-rsvp.vercel.app/event-rsvp" },
-    { "source": "/event-rsvp/:path*", "destination": "https://onttle-examples-event-rsvp.vercel.app/event-rsvp/:path*" }
+    { "source": "/event-rsvp/:path*", "destination": "https://onttle-examples-event-rsvp.vercel.app/event-rsvp/:path*" },
+    { "source": "/photo-portfolio", "destination": "https://onttle-examples-photo-portfolio.vercel.app/photo-portfolio" },
+    { "source": "/photo-portfolio/:path*", "destination": "https://onttle-examples-photo-portfolio.vercel.app/photo-portfolio/:path*" }
   ]
 }
