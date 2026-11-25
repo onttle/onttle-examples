@@ -7,7 +7,7 @@ A record for writing the post. Numbers and scenes are only what actually happene
 | Item | Detail |
 | --- | --- |
 | Started | 2026-11-25 (KST) |
-| Finished | TODO (done: app code, upload script, gateway entry, lint, typecheck, build and pages checked against a local mock API; series values, endpoints and 12 sample rows fixed through MCP; everything switched to English and a 13th (summer) row added. Left: Vector sync, deployment, the remaining Still-to-record items. Real build passes) |
+| Finished | TODO (done: app code, upload script, gateway entry, lint, typecheck, build and pages checked against a local mock API; series values, endpoints and 12 sample rows fixed through MCP; everything switched to English and a 13th (summer) row added. Vector synced by the person; deployed 2026-11-25 (PR #9). Left: screenshots, time spent) |
 | Built with | Claude Code (desktop app) + the Onttle MCP server (account connection) |
 | Onttle project | Onttle Examples workspace · `006-photo-portfolio` (one language, ko) |
 | Next.js | 16.4.6 (same version and settings as event-rsvp: Cache Components, Partial Prefetching) |
@@ -113,6 +113,24 @@ Run once with the real key by a throwaway script (embeddings `count 12, threshol
 
 **Onttle slow afterwards.** About 10 minutes later the same calls were slow from this machine: list 19 s, categories 9 s, embeddings and bm25 timed out at 40 s. The site's search then hung (see the timeout decision). Cause unknown. Recorded as seen, not retried in a loop.
 
+## AI descriptions, keywords, OCR (2026-11-25, real API)
+
+Read once by a throwaway script that printed only `caption`, `description_generated`, `keywords`, `text_vision`, size and thumbnail widths (no URLs). Claude then compared each description with the 500 px thumbnail.
+
+| Item | Result |
+| --- | --- |
+| Captions | 12 of 12 empty: every alt is the AI description |
+| Description language | English, one sentence each (two for low-tide), although the project's only language code is `ko` |
+| Wrong against the image | 1: dawn-breakwater says "boulder-covered breakwater" / keyword "rocky seawall", but it is tetrapods |
+| Worth a note | cherry-blossom keyword "Japanese cherry blossom" (nothing in the image says so); menu-board stops at "a weathered menu board" (the sign's letters are unreadable Hangul-like shapes) |
+| Keywords | 9–12 per photo, average 11.1, all English lower-case phrases. Repeated mood/genre words: "moody atmosphere" ×3, "night photography" ×2, plus "nature photography", "coastal photography", "serene/tranquil atmosphere" |
+| `text_vision` | OCR on for all 12 uploads (the person). Only rainy-crossing has text: `201 / CO / 1.48 149 / Prom / 6A` (sign fragments). The other 11 are empty, menu-board included (its letters are not real Hangul) |
+| Files | 1024×1024 WebP; thumbnails 80 and 500 px only → srcset 80w, 500w, 1024w. All 12 are AI-generated images (confirmed by the person) |
+
+Usage, last 7 days (`onttle_get_billing_summary`; the plan is unlimited, so every line shows 0 credits): FILE_UPLOAD_CALLS 17, FILE_OCR_CALLS 1, AI_GENERATION_TOKENS 1,603,495 (31 events), AI_ASK_TOKENS 477,107 (21), API_EMBEDDINGS_TOKENS 231 (2), API_READ_CALLS 190. The person confirmed OCR was on for all 12 uploads, so FILE_OCR_CALLS 1 does not count files (or counts only files with text); not confirmed with Onttle. Generation tokens mix the upload descriptions with other generation and cannot be split here.
+
+Deployed site (2026-11-25), threshold 0.5: "blue sea" 4, "autumn leaves" 1, "a rainy alley at night" 5 results. The first semantic search after the deploy hit the 10 s timeout; the next three took 1–2.5 s.
+
 ## 4. Checked without real data
 
 No key, so `pnpm build` with no env fails at "Failed to collect page data for /series/[id]" (`ONTTLE_PROJECT_ID must be set`). To check the pages, Claude ran a throwaway mock of the four endpoints (spec-shaped rows: three photos with an S3-style 1-hour URL and three thumbnails, one row without an image; not committed):
@@ -131,12 +149,12 @@ None of this says what Onttle really returns. Everything below is TODO.
 
 ## 5. Still to record (from the plan)
 
-- [ ] Upload parameter names really used and which fields each one fills
-- [ ] Which language `description_generated` and `keywords` come back in now that the content is English (they were generated at upload, before the switch)
-- [ ] The 13 `description_generated` texts and the final captions: kept / fixed / dropped counts
-- [ ] Average keyword count, share usable as tags, whether they are Korean
+- [ ] Upload parameter names really used and which fields each one fills (the person uploaded with OCR and AI description on for all 12; only one file has OCR output)
+- [x] Which language `description_generated` and `keywords` come back in: English (see "AI descriptions, keywords, OCR")
+- [x] The 12 `description_generated` texts and the final captions: 12 kept, 0 fixed so far; 1 is wrong (dawn-breakwater)
+- [x] Average keyword count, share usable as tags, whether they are Korean: 11.1, English, mood/genre words mixed in
 - [x] Real `presigned_url` lifetime and the resulting revalidate: 300 s → revalidate 150 s, expire 270 s, pages at request time (see Decisions)
 - [x] 5 queries × embeddings vs. bm25, top 3 each: see "Search: 5 queries" below
-- [ ] Credits used (OCR, embeddings, reranker) from the usage screen
-- [ ] Times the agent was wrong, and the real time spent (so far: updating rows through MCP without checking that FILE values survive a partial update)
+- [x] Credits used: 0 (unlimited plan); usage units recorded above
+- [ ] Times the agent was wrong, and the real time spent (wrong: the MCP partial update that cleared FILE, the nested cache, threshold 0.3 by guess, mock values guessed; time: TODO)
 - [ ] Screenshots in `docs/assets/` (7, see the plan)
