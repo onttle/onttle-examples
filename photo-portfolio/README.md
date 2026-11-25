@@ -41,7 +41,7 @@ Every path is under the `basePath` `/photo-portfolio` (local: `http://localhost:
 - Photos are `<img srcset>` from the thumbnails, **not `next/image`**. Onttle already resized them, and the image optimizer would cache URLs that stop working.
 - They live **5 minutes** (`X-Amz-Expires=300`). `listPhotos()` reads how long the URLs have left from the URLs themselves (`X-Amz-Date` + `X-Amz-Expires`, or `Expires`) and sets `cacheLife` to revalidate at half of that (150 s) and expire before it (270 s). Without either, it assumes 20 minutes.
 - A cache that expires in under 5 minutes cannot be prerendered, so the photo pages are not static: each request renders inside `<Suspense>` from that shared cache. One side effect: an unknown slug shows the not-found page with status 200, because the response has already started streaming.
-- The photo page and search reuse the same cached list (13 rows), so every image on the site comes from one place.
+- The photo page and search reuse the same cached list (12 rows), so every image on the site comes from one place.
 - No `og:image`: a link preview would keep a dead URL.
 
 ### Search cost guard
